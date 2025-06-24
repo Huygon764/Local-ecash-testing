@@ -1,0 +1,14 @@
+{
+  "testWallet": {
+    "recoveryPhrase": "your development test wallet recovery phrase here",
+    "phoneNumber": "your development test wallet phone number here"
+  },
+  "ciTestWallet": {
+    "recoveryPhrase": "test word1 word2 word3 word4 word5 word6 word7 word8 word9 word10 word11",
+    "phoneNumber": "123456789"
+  },
+  "prodWallet": {
+    "recoveryPhrase": "your production wallet recovery phrase here",
+    "phoneNumber": "your production wallet phone number here"
+  }
+}

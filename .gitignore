@@ -1,0 +1,32 @@
+# Authentication files
+/data-auth/
+/data/seeds.json
+
+# Playwright artifacts
+/test-results/
+/playwright-report/
+/playwright/.cache/
+/blob-report/
+/artifacts/
+
+# Node.js dependencies
+/node_modules/
+npm-debug.log
+yarn-error.log
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.swp
+*.swo
