@@ -7,6 +7,13 @@
     "test:ui": "playwright test --ui",
     "test:debug": "playwright test --debug",
     "test:interval": "node scripts/run-tests-interval.js",
+    "test:release": "playwright test tests/local/main-flow/seller-release-local.spec.ts --project=chromium --headed",
+    "test:release-with-deposit": "playwright test tests/local/main-flow/seller-release-have-buyer-deposit-local.spec.ts --project=chromium --headed",
+    "test:return": "playwright test tests/local/main-flow/return-flow-local.spec.ts --project=chromium --headed",
+    "test:return-with-deposit": "playwright test tests/local/main-flow/return-flow-buyer-deposit-local.spec.ts --project=chromium --headed",
+    "test:dispute": "playwright test tests/local/main-flow/dispute-flow-local.spec.ts --project=chromium --headed",
+    "test:dispute-with-deposit": "playwright test tests/local/main-flow/dispute-flow-buyer-deposit-local.spec.ts --project=chromium --headed",
+    "test:main-flows": "playwright test tests/local/main-flow/ --project=chromium",
     "codegen": "playwright codegen"
   },
   "keywords": [],
@@ -16,6 +23,7 @@
   "devDependencies": {
     "@playwright/test": "^1.52.0",
     "@types/node": "^22.15.21",
+    "dotenv": "^16.5.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   },

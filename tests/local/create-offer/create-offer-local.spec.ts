@@ -1,8 +1,8 @@
 import { test, expect, BrowserContext, Page } from '@playwright/test';
 import * as path from 'path';
 import * as fs from 'fs';
-
-const url = 'https://escrow.test';
+import dotenv from 'dotenv';
+dotenv.config();
 
 async function setupTestContext(browser: any): Promise<{ context: BrowserContext; page: Page }> {
   // Load auth state
@@ -22,7 +22,7 @@ async function setupTestContext(browser: any): Promise<{ context: BrowserContext
   const page = await context.newPage();
   
   // Navigate to a temporary route on the actual domain to initialize IndexedDB
-  await page.goto(`${url}/init`);
+  await page.goto(`${process.env.LOCAL_LINK}/init`);
   
   // Initialize IndexedDB with our data
   const indexedDBData = JSON.parse(fs.readFileSync(indexedDBPath, 'utf-8'));

@@ -1,33 +1,55 @@
 import { test } from '@playwright/test';
 import * as path from 'path';
 import * as fs from 'fs';
+import dotenv from 'dotenv';
+dotenv.config();
 
 // Load seeds data
 const seedsPath = path.join(process.cwd(), 'data', 'seeds.json');
-const botName = 'bobobo_botbot';
+const botName = process.env.LOCAL_BOT_NAME;
 let recoveryPhrase: string, phoneNumber: string, phoneCode: string;
+let walletRole = process.env.WALLET_ROLE || 'Seller';
 
-try {
-  const seedsData = JSON.parse(fs.readFileSync(seedsPath, 'utf8'));
-  const walletType = process.env.CI ? 'ciTestWallet' : 'testWallet';
-  ({ recoveryPhrase, phoneNumber, phoneCode } = seedsData[walletType]);
-  console.log(`Using ${walletType} for testing`);
-} catch (error) {
-  console.error('Error loading seeds.json. Ensure seeds.template.json is copied and filled in.');
-  throw error;
+const loadParams = async () => {
+  // Simple validation for wallet role
+  const validRoles = ['Seller', 'Buyer', 'Arb'];
+
+  console.log(`Using wallet role: ${walletRole}`);
+
+  if (!validRoles.includes(walletRole)) {
+    throw new Error(`Invalid wallet role: ${walletRole}. Must be one of: ${validRoles.join(', ')}`);
+  }
+
+  // Map roles to wallet types in seeds.json
+  const walletTypeMap = {
+    'Seller': 'SellerLocalWallet',
+    'Buyer': 'BuyerLocalWallet',
+    'Arb': 'ArbLocalWallet'
+  };
+
+  try {
+    const seedsData = JSON.parse(fs.readFileSync(seedsPath, 'utf8'));
+    const walletType = process.env.CI ? 'ciTestWallet' : walletTypeMap[walletRole];
+    ({ recoveryPhrase, phoneNumber, phoneCode } = seedsData[walletType]);
+    console.log(`Using ${walletType} for testing as ${walletRole} role`);
+  } catch (error) {
+    console.error('Error loading seeds.json. Ensure seeds.template.json is copied and filled in.');
+    throw error;
+  }
+
 }
-
 // Increase timeout for the test
 test.setTimeout(180000); // 3 minutes
 
 // Authentication test
 test.describe('@auth', () => {
-  test('Generate auth state for LocaleCash', async ({ browser }) => {
+  test(`Generate ${walletRole} auth state for LocaleCash`, async ({ browser }) => {
+    await loadParams();
     const context = await browser.newContext();
     await context.clearCookies();
 
     const page = await context.newPage();
-    await page.goto('https://escrow.test');
+    await page.goto(process.env.LOCAL_LINK || 'https://escrow.test', { waitUntil: 'networkidle' });
 
     // Track OAuth popup URL
     let oauthUrl: string;
@@ -41,6 +63,7 @@ test.describe('@auth', () => {
     // Start login process
     await page.locator('.MuiButtonBase-root').first().click();
     await page.getByRole('button', { name: 'Log In' }).click();
+    await page.waitForLoadState('networkidle');
 
     const telegramLoginButton = page.locator(`#telegram-login-${botName}`).contentFrame()
       .getByRole('button', { name: 'Log in with Telegram' });
@@ -64,7 +87,7 @@ test.describe('@auth', () => {
     console.log('Waiting for successful login and wallet import...');
     await page.waitForLoadState('networkidle');
 
-    await new Promise(resolve => setTimeout(resolve, 10000)); // Wait for 2 seconds
+    await new Promise(resolve => setTimeout(resolve, 5000)); // Wait for 5 seconds
 
     // Get IndexedDB data after wallet import
     const indexedDBData = await page.evaluate(async () => {
@@ -114,19 +137,29 @@ test.describe('@auth', () => {
         };
       });
     });
-
-
     // Save auth state and IndexedDB data
     const folderAuthData = path.join(process.cwd(), 'data-auth');
-    const authPath = path.join(folderAuthData, 'auth.json');
-    const indexedDBPath = path.join(folderAuthData, 'indexeddb-data.json');
+    const localAuthFolder = path.join(folderAuthData, 'local');
 
-    console.log('Saving authentication state and IndexedDB data...');
+    // Create local folder if it doesn't exist
+    if (!fs.existsSync(localAuthFolder)) {
+      fs.mkdirSync(localAuthFolder, { recursive: true });
+    }
+
+    // Create role-specific auth files
+    const authPath = path.join(localAuthFolder, `${walletRole.toLowerCase()}-auth.json`);
+    const indexedDBPath = path.join(localAuthFolder, `${walletRole.toLowerCase()}-indexeddb-data.json`);
+
+    console.log(`Saving authentication state and IndexedDB data for ${walletRole} role...`);
 
     try {
+      // Save to role-specific location
       await context.storageState({ path: authPath });
       fs.writeFileSync(indexedDBPath, JSON.stringify(indexedDBData, null, 2));
-      console.log('Auth state and IndexedDB data saved successfully.');
+
+      console.log(`Auth state and IndexedDB data saved successfully for ${walletRole} role.`);
+      console.log(`Role-specific auth saved to: ${authPath}`);
+      console.log(`Role-specific IndexedDB data saved to: ${indexedDBPath}`);
     } catch (error) {
       console.error('Failed to save state:', error);
       throw error;

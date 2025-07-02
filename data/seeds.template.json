@@ -1,7 +1,18 @@
 {
-  "testWallet": {
-    "recoveryPhrase": "your development test wallet recovery phrase here",
-    "phoneNumber": "your development test wallet phone number here"
+  "SellerLocalWallet": {
+    "recoveryPhrase": "your seller wallet recovery phrase here",
+    "phoneNumber": "your seller wallet phone number here",
+    "phoneCode": "84"
+  },
+  "BuyerLocalWallet": {
+    "recoveryPhrase": "your buyer wallet recovery phrase here",
+    "phoneNumber": "your buyer wallet phone number here",
+    "phoneCode": "84"
+  },
+  "ArbLocalWallet": {
+    "recoveryPhrase": "your arbitrator wallet recovery phrase here",
+    "phoneNumber": "your arbitrator wallet phone number here",
+    "phoneCode": "84"
   },
   "ciTestWallet": {
     "recoveryPhrase": "test word1 word2 word3 word4 word5 word6 word7 word8 word9 word10 word11",

@@ -11,8 +11,11 @@ npm install
 
 2. Configure test data:
    - Copy `data/seeds.template.json` to `data/seeds.json`
-   - Update the `testWallet` section with your development test credentials
-   - Update the `prodWallet` section with your production test credentials
+   - Update the wallet sections with your credentials:
+     - `SellerLocalWallet`: For the seller role in local tests
+     - `BuyerLocalWallet`: For the buyer role in local tests
+     - `ArbLocalWallet`: For the arbitrator role in local tests
+     - `prodWallet`: For production tests
 
 ## Running Tests
 
@@ -42,10 +45,27 @@ npx playwright test generate-auth.spec.ts --grep @auth
 npx playwright test --grep @prod-auth
 ```
 
-These tests will:
+#### Role-based Authentication for Local Tests
+
+For local testing, you can generate authentication states for different wallet roles (Seller, Buyer, Arbitrator):
+
+```bash
+# Generate auth for all roles (Seller, Buyer, Arb)
+./scripts/generate-auth-roles.sh
+
+# Generate auth for a specific role
+./scripts/generate-auth-roles.sh Seller
+./scripts/generate-auth-roles.sh Buyer
+./scripts/generate-auth-roles.sh Arb
+
+# Alternatively, you can use the environment variable directly
+WALLET_ROLE=Seller npx playwright test tests/local/auth/generate-auth-local.spec.ts
+```
+
+These authentication tests will:
 1. Log in to the application
-2. Import the wallet
-3. Save authentication state and IndexedDB data for future test runs
+2. Import the wallet based on the specified role
+3. Save authentication state and IndexedDB data for future test runs in `data-auth/local/[role]-auth.json`
 
 ### Production Tests
 
